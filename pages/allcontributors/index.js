@@ -10,16 +10,30 @@ import Image from "next/image";
 import { FixedSizeGrid as Grid } from "react-window";
 
 const useSearch = (contributors, search) => {
-	return useMemo(() => {	
-	return contributors.filter(
-		(item) =>{
-			let strName = item.name.toLowerCase();
-			let strCollege = item.college.toLowerCase();
-			if(strName.includes(search) || strCollege.includes(search) ){
-				return item;
-			}	
+	return useMemo(() => {
+		let filteredContributors;
+		
+		// If no search term, return all contributors
+		if (!search || search.trim() === '') {
+			filteredContributors = contributors;
+		} else {
+			const searchTerm = search.toLowerCase().trim();
+			
+			filteredContributors = contributors.filter((item) => {
+				const strName = item.name.toLowerCase();
+				const strCollege = item.college.toLowerCase();
+				const strBranch = item.branch.toLowerCase();
+				
+				return strName.includes(searchTerm) || 
+					   strCollege.includes(searchTerm) || 
+					   strBranch.includes(searchTerm);
+			});
 		}
-	);
+		
+		// Sort alphabetically by name
+		return filteredContributors.sort((a, b) => 
+			a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+		);
 	}, [contributors, search]);
 };
 
