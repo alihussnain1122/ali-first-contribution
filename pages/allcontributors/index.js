@@ -24,57 +24,94 @@ const useSearch = (contributors, search) => {
 };
 
 function  VirtualGrid( { searchResult } ){
+	const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
 
-	const Cell = ({ rowIndex , columnIndex , style }) =>{
-		const itemIndex = rowIndex * 2 + columnIndex;
-		if (itemIndex >= searchResult.length) {
-			return null; // Return an empty cell if there are no more items to render
-		  }
-	  
-		  const item = searchResult[itemIndex];
-		  
-	const searchStyles = {
-		width: "100%",
+	React.useEffect(() => {
+		const handleResize = () => {
+			setWindowSize({ 
+				width: window.innerWidth, 
+				height: window.innerHeight 
+			});
+		};
+
+		// Set initial size
+		handleResize();
 		
-		display: "flex",
-		height: "250px",
-		overflow: "hidden",
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
+
+	// Calculate responsive grid dimensions
+	const getGridDimensions = () => {
+		const containerPadding = 40; // Account for padding
+		const availableWidth = Math.max(windowSize.width - containerPadding, 300);
 		
+		let columnCount = 3;
+		if (availableWidth < 768) columnCount = 1;
+		else if (availableWidth < 1024) columnCount = 2;
 		
+		const columnWidth = Math.floor(availableWidth / columnCount) - 20;
+		const gridWidth = availableWidth;
+		const gridHeight = Math.min(800, windowSize.height * 0.6);
 		
+		return { columnCount, columnWidth, gridWidth, gridHeight };
 	};
 
-	  
-		  return (
-			<div  className="GridItemEven" style={ style }>
-			  <ContributorCard
-				name={item.name}
-				branch={item.branch}
-				college={item.college}
-				year={item.year} 
-				linkedin={item.linkedin}
-				github={item.github}
-				gender={item.gender}
-				style={searchStyles}
-			  />
+	const { columnCount, columnWidth, gridWidth, gridHeight } = getGridDimensions();
 
-			 
-			</div>
-		  );
+	const Cell = ({ rowIndex , columnIndex , style }) =>{
+		const itemIndex = rowIndex * columnCount + columnIndex;
+		if (itemIndex >= searchResult.length) {
+			return null;
+		}
+	  
+		const item = searchResult[itemIndex];
+		  
+		const searchStyles = {
+			width: "100%",
+			display: "flex",
+			height: "250px",
+			overflow: "hidden",
+			padding: "10px",
+			boxSizing: "border-box"
 		};
-		return(
-			<Grid columnCount={3}
-			className="Grid"
-			columnWidth={450}
-			height={1500}
-			rowCount={searchResult.length/3}
-			rowHeight={350}
-			width={2500}>
+
+		return (
+			<div className="GridItemEven" style={style}>
+				<ContributorCard
+					name={item.name}
+					branch={item.branch}
+					college={item.college}
+					year={item.year} 
+					linkedin={item.linkedin}
+					github={item.github}
+					gender={item.gender}
+					style={searchStyles}
+				/>
+			</div>
+		);
+	};
+
+	if (windowSize.width === 0) {
+		return <div>Loading...</div>;
+	}
+
+	return(
+		<div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+			<Grid 
+				columnCount={columnCount}
+				className="Grid"
+				columnWidth={columnWidth}
+				height={gridHeight}
+				rowCount={Math.ceil(searchResult.length / columnCount)}
+				rowHeight={280}
+				width={gridWidth}
+			>
 				{Cell}
 			</Grid>
-		)
-		
-		}
+		</div>
+	);
+}
 
 const index = () => {
 	const totalContributor = contributors.length;

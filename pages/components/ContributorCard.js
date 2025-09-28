@@ -1,18 +1,39 @@
-import React from "react";
+import React, { useState } from "react";
 import { Avatar, ChakraProvider } from "@chakra-ui/react";
 
 const ContributorCard = (props) => {
+  const [avatarError, setAvatarError] = useState(false);
+  
   const width ={
     width: '100%',
   }
+
+  // Multiple fallback avatar sources
+  const getAvatarSrc = () => {
+    if (avatarError) {
+      // Use initials-based avatar as ultimate fallback
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(props.name)}&background=0D8ABC&color=fff&size=128&bold=true`;
+    }
+    return `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(props.name)}.svg`;
+  };
+
+  const handleAvatarError = () => {
+    setAvatarError(true);
+  };
+
   return (
     <>
-
         <div onClick={() => window.open(props.github, '_blank')} className="p-2 lg:w-1/3 md:w-1/2 w-full cursor-pointer" style={props.style}>
           <div className="h-full flex md:flex-col xl:flex-row items-center border-gray-200 border p-4 rounded-lg dark:bg-gray-600 bg-gray-50" style={width}>
               <div className="md:mb-3 xl:mb-0">
             <ChakraProvider>
-                <Avatar size="xl" name={props.name} src={`https://avatars.dicebear.com/api/bottts/${props.name}.svg`}/>
+                <Avatar 
+                  size="xl" 
+                  name={props.name} 
+                  src={getAvatarSrc()}
+                  onError={handleAvatarError}
+                  loading="eager"
+                />
             </ChakraProvider>
               </div>
             <div className="flex-grow ml-7 md:ml-0 lg:ml-7">
