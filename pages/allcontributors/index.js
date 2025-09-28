@@ -57,16 +57,27 @@ function  VirtualGrid( { searchResult } ){
 
 	// Calculate responsive grid dimensions
 	const getGridDimensions = () => {
-		const containerPadding = 40; // Account for padding
+		const containerPadding = 80; // Account for container padding (40px each side)
+		const cardMargin = 24; // Account for card margins
 		const availableWidth = Math.max(windowSize.width - containerPadding, 300);
 		
 		let columnCount = 3;
-		if (availableWidth < 768) columnCount = 1;
-		else if (availableWidth < 1024) columnCount = 2;
+		let minCardWidth = 320; // Minimum card width for proper content display
 		
-		const columnWidth = Math.floor(availableWidth / columnCount) - 20;
+		if (availableWidth < 768) {
+			columnCount = 1;
+			minCardWidth = Math.min(400, availableWidth - cardMargin);
+		} else if (availableWidth < 1200) {
+			columnCount = 2;
+			minCardWidth = Math.floor((availableWidth - cardMargin) / 2) - 20;
+		} else {
+			columnCount = 3;
+			minCardWidth = Math.floor((availableWidth - cardMargin) / 3) - 20;
+		}
+		
+		const columnWidth = Math.max(minCardWidth, 320);
 		const gridWidth = availableWidth;
-		const gridHeight = Math.min(800, windowSize.height * 0.6);
+		const gridHeight = Math.min(windowSize.height * 0.7, 1000);
 		
 		return { columnCount, columnWidth, gridWidth, gridHeight };
 	};
@@ -84,9 +95,9 @@ function  VirtualGrid( { searchResult } ){
 		const searchStyles = {
 			width: "100%",
 			display: "flex",
-			height: "250px",
-			overflow: "hidden",
-			padding: "10px",
+			height: "100%",
+			overflow: "visible",
+			padding: "8px",
 			boxSizing: "border-box"
 		};
 
@@ -111,15 +122,24 @@ function  VirtualGrid( { searchResult } ){
 	}
 
 	return(
-		<div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+		<div style={{ 
+			width: '100%', 
+			display: 'flex', 
+			justifyContent: 'center',
+			padding: '0 20px',
+			boxSizing: 'border-box'
+		}}>
 			<Grid 
 				columnCount={columnCount}
 				className="Grid"
 				columnWidth={columnWidth}
 				height={gridHeight}
 				rowCount={Math.ceil(searchResult.length / columnCount)}
-				rowHeight={280}
+				rowHeight={360}
 				width={gridWidth}
+				style={{
+					overflow: 'auto'
+				}}
 			>
 				{Cell}
 			</Grid>
@@ -141,7 +161,7 @@ const index = () => {
 			<Navbar />
 			<PageContentWrapper>
 				<section className="text-gray-600 dark:text-white body-font">
-					<div className="container px-5 pt-12 mx-auto">
+					<div className="w-full px-4 sm:px-6 lg:px-8 pt-12 mx-auto max-w-7xl">
 						<div className="flex flex-col text-center w-full mb-5">
 							<h1 className="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900 dark:text-white underline underline-offset-4">
 								Our Contributors
